@@ -13,7 +13,9 @@ const grå = (t) => `\x1b[90m${t}\x1b[0m`;
 const oransje = (t) => `\x1b[38;5;208m${t}\x1b[0m`;
 const grønn = (t) => `\x1b[32m${t}\x1b[0m`;
 
-export async function kjørAgent({ system, oppgave, verktøy }) {
+// `ved` får hendelser underveis (tekst, verktøykall, resultat, ferdig). Frontenden
+// bruker den til å vise agentens arbeid live. Terminalutskriften er uendret.
+export async function kjørAgent({ system, oppgave, verktøy, ved = () => {} }) {
   // Bare verktøy med en kjør-funksjon sendes til modellen. Stubbene i
   // verktoy.js blir med av seg selv når dere implementerer dem.
   const aktive = verktøy.filter((v) => v.kjør);
@@ -35,17 +37,24 @@ export async function kjørAgent({ system, oppgave, verktøy }) {
 
     for (const blokk of svar.content) {
       if (blokk.type === 'text' && blokk.text.trim()) {
-        console.log(svar.stop_reason === 'tool_use' ? grå(blokk.text) : blokk.text);
+        const mellomsteg = svar.stop_reason === 'tool_use';
+        console.log(mellomsteg ? grå(blokk.text) : blokk.text);
+        ved({ type: 'tekst', tekst: blokk.text, mellomsteg });
       }
     }
 
-    if (svar.stop_reason === 'end_turn') return svar;
+    if (svar.stop_reason === 'end_turn') {
+      ved({ type: 'ferdig', stopp: 'end_turn' });
+      return svar;
+    }
     if (svar.stop_reason === 'refusal') {
       console.log(oransje(`\n✖ Modellen avslo (${svar.stop_details?.category ?? 'ukjent grunn'}).`));
+      ved({ type: 'ferdig', stopp: 'refusal' });
       return svar;
     }
     if (svar.stop_reason === 'max_tokens') {
       console.log(oransje('\n✖ Svaret ble kuttet (max_tokens).'));
+      ved({ type: 'ferdig', stopp: 'max_tokens' });
       return svar;
     }
 
@@ -55,12 +64,16 @@ export async function kjørAgent({ system, oppgave, verktøy }) {
     const resultater = [];
     for (const k of kall) {
       console.log(oransje(`→ ${k.name}`) + grå(` ${JSON.stringify(k.input)}`));
-      resultater.push(await kjørVerktøy(etterNavn, k));
+      ved({ type: 'verktoy_kall', id: k.id, navn: k.name, input: k.input });
+      const resultat = await kjørVerktøy(etterNavn, k);
+      ved({ type: 'verktoy_resultat', id: k.id, ok: !resultat.is_error, tegn: resultat.content.length, resultat: resultat.content });
+      resultater.push(resultat);
     }
     messages.push({ role: 'user', content: resultater });
   }
 
   console.log(oransje(`\n✖ Stoppet etter ${MAX_ITERASJONER} runder (MAX_ITERASJONER).`));
+  ved({ type: 'ferdig', stopp: 'maks_iterasjoner' });
 }
 
 async function kjørVerktøy(etterNavn, kall) {

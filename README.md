@@ -2,6 +2,31 @@
 
 ![Megakart over oppgaven](kart.jpg)
 
+## Løsningen: Konsulent-orakelet
+
+En bemanningsagent med nettside. Du beskriver behovet på norsk, og agenten finner kandidater, sjekker tilgjengelighet, lager gapanalyse og opplæringsplan for nesten-treff, og husker samtalen mens du bygger et team. All data er syntetisk.
+
+**Kjør (Python, uten byggesteg):**
+
+```bash
+pip install -r python/requirements.txt
+export ANTHROPIC_API_KEY=...   # eller legg den i .env (ligger i .gitignore)
+python python/server.py        # åpne http://localhost:3001
+```
+
+Skriv **«Obliviate»** for å glemme samtalen og teamet, og **«Wingardium Leviosa»** for å løfte teamet inn i Team Repository.
+
+| Mappe | Innhold |
+|---|---|
+| `python/` | Server (agentløkke, verktøy, API) og nettsiden i `python/web/` |
+| `src/`, `frontend/` | Node- og React-variant fra tidligere iterasjon. Har ikke de nyeste funksjonene (team, kurs, gapanalyse) |
+| `data/kurs.json` | Kurskatalog med 89 syntetiske kurs, inkludert Halloween-kurs |
+| `docs/` | Arkitektur, datamodell og manus til demovideoen |
+
+Portrettene i `python/web/assets/portraits/ai/` er AI-genererte fantasifigurer og kommer fra hackaton-pakkene. Sjekk bruksvilkårene før repoet gjøres offentlig.
+
+---
+
 Bygg en agent som svarer på «hvem kan ta denne jobben?» ved å lete i kompetanse-, tilgjengelighets- og CV-data for 80 oppdiktede konsulenter.
 
 ## Kom i gang

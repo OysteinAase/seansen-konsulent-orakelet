@@ -7,7 +7,18 @@ import path from 'node:path';
 const DATA = path.join(import.meta.dirname, '..', 'data');
 const lesJson = (fil) => JSON.parse(fs.readFileSync(path.join(DATA, fil), 'utf8'));
 
-const konsulenter = lesJson('konsulenter.json');
+export const konsulenter = lesJson('konsulenter.json');
+export const tilgjengelighet = lesJson('tilgjengelighet.json');
+export const prosjekthistorikk = lesJson('prosjekthistorikk.json');
+
+// Id-er er alltid k + tre sifre. Å validere mønsteret hindrer at noen ber om «../../.env».
+export const erGyldigId = (id) => typeof id === 'string' && /^k\d{3}$/.test(id);
+
+export function lesCv(id) {
+  if (!erGyldigId(id)) throw new Error(`Ugyldig id «${id}». Bruk formatet "k007".`);
+  const fil = path.join(DATA, 'cv', `${id}.md`);
+  return fs.existsSync(fil) ? fs.readFileSync(fil, 'utf8') : null;
+}
 
 export const system = `Du er bemanningsagenten i et konsulentselskap med kontorer i Oslo, Bergen, Trondheim og Stavanger.
 Du får et behov i naturlig språk og skal finne de beste kandidatene.
@@ -69,9 +80,14 @@ Merk at noen bare er delvis ledige, og at enkelte har en kommentar som begrenser
         required: ['ider'],
       },
     },
-    // TODO: les data/tilgjengelighet.json og returner radene med id i input.ider.
-    // Tenk på ukjente id-er og hva som skjer når listen er tom.
-    kjør: null,
+    kjør: async ({ ider }) => {
+      if (!Array.isArray(ider) || !ider.length) {
+        throw new Error('Oppgi minst én id, f.eks. {"ider": ["k007", "k023"]}.');
+      }
+      const treff = tilgjengelighet.filter((t) => ider.includes(t.id));
+      const ukjente = ider.filter((id) => !treff.some((t) => t.id === id));
+      return ukjente.length ? { treff, ukjente_ider: ukjente } : { treff };
+    },
   },
   {
     definisjon: {
@@ -85,10 +101,7 @@ CV-en kan være mer oppdatert, eller mindre, enn kompetanseprofilen. Si fra hvis
         required: ['id'],
       },
     },
-    // TODO: les data/cv/<id>.md. Fila finnes ikke for alle; returner en tydelig
-    // tekst («Ingen CV for k041») i stedet for å kaste. Valider id-en, så ingen
-    // kan be om «../../.env».
-    kjør: null,
+    kjør: async ({ id }) => lesCv(id) ?? `Ingen CV for ${id}. Bruk profilen og prosjekthistorikken i stedet.`,
   },
   {
     definisjon: {
@@ -102,8 +115,10 @@ Juniorer har ofte ingen historikk ennå.`,
         required: ['id'],
       },
     },
-    // TODO: slå opp i data/prosjekthistorikk.json på konsulent_id. Vurder om
-    // verktøyet heller bør søke på teknologi eller bransje på tvers av alle.
-    kjør: null,
+    kjør: async ({ id }) => {
+      if (!erGyldigId(id)) throw new Error(`Ugyldig id «${id}». Bruk formatet "k007".`);
+      const rad = prosjekthistorikk.find((p) => p.konsulent_id === id);
+      return rad?.prosjekter.length ? rad.prosjekter : `Ingen prosjekthistorikk for ${id}.`;
+    },
   },
 ];

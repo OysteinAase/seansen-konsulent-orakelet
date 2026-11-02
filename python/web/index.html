@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#090b12" />
+    <title>Seansen – Konsulent-orakelet</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <aside class="sidebar" id="sidemeny">
+      <a class="brand" href="/" aria-label="Seansen, til forsiden">
+        <span class="brand-orb">✧</span>
+        <span class="brand-type"><strong>SEANSEN</strong><small>KONSULENT-ORAKELET</small></span>
+      </a>
+      <div class="sidebar-label">THE GRIMOIRE</div>
+      <nav class="nav-list faner" aria-label="Hovedmeny">
+        <button type="button" class="nav-link fane aktiv" data-fane="orakel" data-side="ORAKELET"><span class="nav-icon">✧</span><span>Orakelet</span></button>
+        <button type="button" class="nav-link fane" data-fane="kurs" data-side="KURSKATALOG"><span class="nav-icon">◈</span><span>Kurskatalog</span></button>
+        <button type="button" class="nav-link fane" data-fane="repo" data-side="TEAM REPOSITORY"><span class="nav-icon">❖</span><span>Team Repository</span><span class="nav-count" id="repo-teller"></span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="footer-card">
+          <div class="moon-icon">☾</div>
+          <div class="footer-overline">HALLOWEEN HACKATHON</div>
+          <strong>The spirits are ready.</strong>
+          <p>Orakelet husker samtalen og teamet ditt. Skriv «Obliviate» for å glemme alt.</p>
+          <div class="footer-sigil">✦ 2026 ✦</div>
+        </div>
+        <div class="footer-credit">A SEANSEN EXPERIMENT <span>v1.0</span></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button type="button" id="mobilmeny" class="mobile-menu" aria-label="Åpne meny">☰</button>
+        <div class="breadcrumb">THE GRIMOIRE <span>/</span> <strong id="denne-siden">ORAKELET</strong></div>
+        <span class="agentstatus" id="status">Agent aktiv</span>
+      </header>
+
+      <div id="orakel">
+        <section class="hero" id="hero" aria-label="Introduksjon">
+          <div class="hero-grid" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-line"></span> THE CONSULTANT NECROMANCY PROJECT <span aria-hidden="true">✦</span></div>
+            <h1>Hvem kan <em>ta jobben?</em></h1>
+            <p class="hero-lead">Beskriv behovet, så leter orakelet gjennom 80 konsulentsjeler og forteller deg hvem som passer, hvem som er ledig og hva de mangler.</p>
+            <form id="skjema" class="search-panel">
+              <label class="search-field">
+                <span aria-hidden="true">✧</span>
+                <textarea id="oppgave" rows="3" maxlength="1000" aria-label="Beskriv behovet" placeholder="Vi trenger en senior React-utvikler i Bergen fra desember …"></textarea>
+              </label>
+              <div class="knapper">
+                <button type="submit" id="send" class="primary-button">Spør orakelet</button>
+                <button type="button" id="glem" class="ghost-button" hidden title="Skriver «Obliviate» for deg">✦ Obliviate</button>
+              </div>
+            </form>
+            <p class="meta" id="minnehint" hidden></p>
+            <div class="eksempler" id="eksempler"></div>
+            <div class="hero-footnote">✳ Alle profiler er syntetiske · Kurs og fantasy-detaljer er kun for lek</div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="hero-halo h1"></div><div class="hero-halo h2"></div><div class="hero-halo h3"></div>
+            <div class="hero-rune rune-one">ᚷ</div><div class="hero-rune rune-two">✧</div><div class="hero-rune rune-three">✶</div>
+            <div class="featured-frame"><img id="portrett-forside" src="/assets/portraits/ai/k016.jpg" alt="" decoding="async" /></div>
+            <div class="featured-tag"><span class="featured-spark">✦</span><span><small>THE ORACLE SEES YOU</small><strong>SPØR, SÅ SKAL DU FÅ SVAR</strong></span></div>
+          </div>
+        </section>
+
+        <div class="feil" id="feil" hidden></div>
+
+        <div class="rutenett" id="rutenett" hidden>
+          <div class="kolonne">
+            <section class="panel">
+              <h3>Samtale</h3>
+              <div class="samtale" id="samtale"></div>
+            </section>
+            <section class="panel">
+              <h3>Mitt Team <span class="antall" id="team-antall"></span></h3>
+              <div class="team" id="team"></div>
+            </section>
+          </div>
+          <section class="panel">
+            <h3>Kandidater <span class="antall" id="antall"></span></h3>
+            <p class="tom" id="venter">Kandidatene dukker opp når orakelet er ferdig.</p>
+            <p class="feil" id="stoppmelding" hidden></p>
+            <div class="kort-liste" id="kandidater"></div>
+          </section>
+        </div>
+      </div>
+
+      <section class="section-wrap" id="kurs" hidden>
+        <div class="section-title-row">
+          <div>
+            <div class="section-overline">✦ OPEN THE GRIMOIRE ✦</div>
+            <h2>Kurskatalog</h2>
+            <p>Teknologi og litt svart magi. Alt gir ekte kompetanse.</p>
+          </div>
+        </div>
+        <div class="search-panel kursfilter">
+          <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="kurssok" autocomplete="off" aria-label="Søk i kurskatalogen" placeholder="Søk etter ferdighet eller kurs …" /></label>
+          <div class="chiprad">
+            <button type="button" class="chip aktiv" data-tema="">Alle</button>
+            <button type="button" class="chip" data-tema="teknologi">Teknologi</button>
+            <button type="button" class="chip" data-tema="halloween">🎃 Halloween</button>
+          </div>
+        </div>
+        <div class="roster-toolbar"><span class="status-flame">✧</span><span id="kursantall"></span></div>
+        <div class="kursrutenett" id="kursliste"></div>
+      </section>
+
+      <section class="section-wrap" id="repo" hidden>
+        <div class="section-title-row">
+          <div>
+            <div class="section-overline">✦ THE TEAM VAULT ✦</div>
+            <h2>Team Repository</h2>
+            <p>Ferdige team som er løftet hit med «Wingardium Leviosa». De ligger lagret i denne nettleseren.</p>
+          </div>
+          <span class="antall" id="repo-antall"></span>
+        </div>
+        <div class="repogrid" id="repo-liste"></div>
+      </section>
+
+      <section class="bottom-quote"><span>✦</span> THE RIGHT PEOPLE. THE RIGHT SKILLS. THE RIGHT TIME. <span>✦</span></section>
+    </main>
+
+    <div id="detalj"></div>
+
+    <!-- Animasjoner: jakten på den gylne snobben mens agenten jobber, og tryllestavblinket ved Obliviate. -->
+    <div id="jakt" aria-hidden="true" hidden>
+      <div id="snobb">
+        <svg viewBox="0 0 64 44" width="48" height="33">
+          <defs>
+            <radialGradient id="gull" cx="35%" cy="30%" r="75%">
+              <stop offset="0" stop-color="#fff7c2" />
+              <stop offset="0.5" stop-color="#fbbf24" />
+              <stop offset="1" stop-color="#b45309" />
+            </radialGradient>
+          </defs>
+          <path class="vinge v" d="M26 24 C14 6 2 8 0 14 C6 22 16 26 26 26Z" fill="#fde68a" opacity="0.9" />
+          <path class="vinge h" d="M38 24 C50 6 62 8 64 14 C58 22 48 26 38 26Z" fill="#fde68a" opacity="0.9" />
+          <circle cx="32" cy="28" r="9" fill="url(#gull)" stroke="#92400e" />
+        </svg>
+      </div>
+      <div id="harry"><span class="trollmann">🧙‍♂️</span><span class="kost">🧹</span></div>
+    </div>
+    <div id="blitz" hidden aria-hidden="true"><span>Obliviate!</span></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
